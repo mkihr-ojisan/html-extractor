@@ -3,7 +3,69 @@
 //! [`HtmlExtractor`](trait.HtmlExtractor.html) is neither a parser nor a deserializer.
 //! It picks up only the desired data from HTML.
 //!
-//! See the documentation of [`html_extractor!`](macro.html_extractor.html) for details and examples.
+//! [`html_extractor!`](macro.html_extractor.html) will help to implement [`HtmlExtractor`](trait.HtmlExtractor.html).
+//!
+//! # Examples
+//! ## Extracting a simple value from HTML
+//! ```
+//! use html_extractor::{html_extractor, HtmlExtractor};
+//! html_extractor! {
+//!     #[derive(Debug, PartialEq)]
+//!     Foo {
+//!         foo: usize = (text of "#foo"),
+//!     }
+//! }
+//!
+//! fn main() {
+//!     let input = r#"
+//!         <div id="foo">1</div>
+//!     "#;
+//!     let foo = Foo::extract_from_str(input).unwrap();
+//!     assert_eq!(foo, Foo { foo: 1 });
+//! }
+//! ```
+//!
+//! ## Extracting a collection from HTML
+//! ```
+//! use html_extractor::{html_extractor, HtmlExtractor};
+//! html_extractor! {
+//!     #[derive(Debug, PartialEq)]
+//!     Foo {
+//!         foo: Vec<usize> = (text of ".foo", collect),
+//!     }
+//! }
+//!
+//! fn main() {
+//!     let input = r#"
+//!         <div class="foo">1</div>
+//!         <div class="foo">2</div>
+//!         <div class="foo">3</div>
+//!         <div class="foo">4</div>
+//!     "#;
+//!     let foo = Foo::extract_from_str(input).unwrap();
+//!     assert_eq!(foo, Foo { foo: vec![1, 2, 3, 4] });
+//! }
+//! ```
+//!
+//! ## Extracting with regex
+//! ```
+//! use html_extractor::{html_extractor, HtmlExtractor};
+//! html_extractor! {
+//!     #[derive(Debug, PartialEq)]
+//!     Foo {
+//!         (foo: usize,) = (text of "#foo", capture with "^foo=(.*)$"),
+//!     }
+//! }
+//!
+//! fn main() {
+//!     let input = r#"
+//!         <div id="foo">foo=1</div>
+//!     "#;
+//!     let foo = Foo::extract_from_str(input).unwrap();
+//!     assert_eq!(foo, Foo { foo: 1 });
+//! }
+//! ```
+
 
 extern crate html_extractor_macros;
 #[doc(hidden)]
