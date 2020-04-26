@@ -1,10 +1,10 @@
 #![allow(clippy::needless_doctest_main)]
 //! This crate provides an easy way to extract data from HTML.
 //! 
-//! [`HtmlExtractor`](trait.HtmlExtractor.html) is neither a parser nor a deserializer.
+//! [`HtmlExtractor`] is neither a parser nor a deserializer.
 //! It picks up only the desired data from HTML.
 //!
-//! [`html_extractor!`](macro.html_extractor.html) will help to implement [`HtmlExtractor`](trait.HtmlExtractor.html).
+//! [`html_extractor!`](macro.html_extractor.html) will help to implement [`HtmlExtractor`].
 //!
 //! # Examples
 //! ## Extracting a simple value from HTML
@@ -76,7 +76,7 @@ pub extern crate scraper;
 pub use error::Error;
 pub mod error;
 
-/// Generates structures that implement [`HtmlExtractor`](trait.HtmlExtractor.html).
+/// Generates structures that implement [`HtmlExtractor`].
 ///
 /// # Syntax
 /// 
@@ -135,9 +135,9 @@ pub mod error;
 ///
 /// If the specified selector is invalid, it will be a compile error.
 ///
-/// If `text of ..` or `attr[..] of ..` is used, the type of field must implement [`FromStr`](https://doc.rust-lang.org/stable/std/str/trait.FromStr.html).
+/// If `text of ..` or `attr[..] of ..` is used, the type of field must implement [`FromStr`](std::str::FromStr).
 ///
-/// If `elem of ..` is used, the type of field must implement [`HtmlExtractor`](trait.HtmlExtractor.html).
+/// If `elem of ..` is used, the type of field must implement [`HtmlExtractor`].
 /// ```
 /// use html_extractor::{html_extractor, HtmlExtractor};
 /// html_extractor! {
@@ -186,7 +186,7 @@ pub mod error;
 /// It cannot be used with target specifier `elem of ..`.
 ///
 /// If it is used without [collect specifier](#collect-specifier), the field must be a [tuple field](#defining-fields-in-structures).
-/// If it is used with [collect specifier](#collect-specifier), the type of the field must be [`FromIterator`](https://doc.rust-lang.org/stable/std/iter/trait.FromIterator.html) of tuple.
+/// If it is used with [collect specifier](#collect-specifier), the type of the field must be [`FromIterator`](std::iter::FromIterator) of tuple.
 /// ```
 /// use html_extractor::{html_extractor, HtmlExtractor};
 /// html_extractor! {
@@ -223,7 +223,7 @@ pub mod error;
 ///
 /// ### Collect specifier
 /// Iterates all the targets specified by [target specifier](#target-specifier) and collects into the type of the field.
-/// The type must be an implementor of [`FromIterator`](https://doc.rust-lang.org/stable/std/iter/trait.FromIterator.html) like [`Vec`](https://doc.rust-lang.org/stable/std/vec/struct.Vec.html).
+/// The type must be an implementor of [`FromIterator`](std::iter::FromIterator) like [`Vec`](std::vec::Vec).
 /// ```
 /// use html_extractor::{html_extractor, HtmlExtractor};
 /// html_extractor! {
@@ -279,7 +279,7 @@ pub mod error;
 /// }
 /// ```
 /// # Usage of the generated structures
-/// The generated structures implement trait [`HtmlExtractor`](trait.HtmlExtractor.html).
+/// The generated structures implement trait [`HtmlExtractor`].
 /// See the document of the trait.
 pub use html_extractor_macros::html_extractor;
 
@@ -290,7 +290,7 @@ pub trait HtmlExtractor
 where
     Self: Sized,
 {
-    /// Extracts data from [`scraper::element_ref::ElementRef`](../scraper/element_ref/struct.ElementRef.html).
+    /// Extracts data from [`scraper::element_ref::ElementRef`].
     fn extract(elem: &scraper::ElementRef) -> Result<Self, Error>;
     /// Parses HTML string and extracts data from it.
     fn extract_from_str(html_str: &str) -> Result<Self, Error> {
