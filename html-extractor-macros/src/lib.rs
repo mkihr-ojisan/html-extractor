@@ -37,26 +37,26 @@ impl TokenStreamIterExt for TokenStreamIter {
     }
     fn peek_ex(&mut self, expected: &str) -> &TokenTree {
         self.peek()
-            .unwrap_or_else(|| panic!("expected {}", expected))
+            .unwrap_or_else(|| abort_call_site!("expected {}", expected))
     }
     fn peek_ex_str(&mut self, expected: &str) -> String {
         self.peek()
-            .unwrap_or_else(|| panic!("expected {}", expected))
+            .unwrap_or_else(|| abort_call_site!("expected {}", expected))
             .to_string()
     }
     fn next_ex(&mut self, expected: &str) -> TokenTree {
         self.next()
-            .unwrap_or_else(|| panic!("expected {}", expected))
+            .unwrap_or_else(|| abort_call_site!("expected {}", expected))
     }
     fn next_ex_str(&mut self, expected: &str) -> String {
         self.next()
-            .unwrap_or_else(|| panic!("expected {}", expected))
+            .unwrap_or_else(|| abort_call_site!("expected {}", expected))
             .to_string()
     }
     fn expect(&mut self, expect: &str) {
         let next = self
             .next()
-            .unwrap_or_else(|| panic!("expected `{}`", expect));
+            .unwrap_or_else(|| abort_call_site!("expected `{}`", expect));
         if next.to_string() != expect {
             abort!(next, "expected `{}`, found `{}`", expect, next);
         }
@@ -608,6 +608,6 @@ impl ExtractTarget {
 fn get_literal_str_value(tt: &TokenTree) -> String {
     let ts = quote!(#tt);
     let lit_str: syn::LitStr =
-        syn::parse2(ts).unwrap_or_else(|_| panic!("expected literal string, found `{}`", tt));
+        syn::parse2(ts).unwrap_or_else(|_| abort!(tt, "expected literal string, found `{}`", tt));
     lit_str.value()
 }
