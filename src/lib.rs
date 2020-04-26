@@ -1,3 +1,10 @@
+//! This crate provides an easy way to extract data from HTML.
+//! 
+//! [`HtmlExtractor`](trait.HtmlExtractor.html) is neither a parser nor a deserializer.
+//! It picks up only the desired data from HTML.
+//!
+//! See the documentation of [`html_extractor!`](macro.html_extractor.html) for details and examples.
+
 extern crate html_extractor_macros;
 #[doc(hidden)]
 pub extern crate lazy_static;
