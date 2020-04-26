@@ -1,3 +1,4 @@
+#![allow(clippy::needless_doctest_main)]
 //! This crate provides an easy way to extract data from HTML.
 //! 
 //! [`HtmlExtractor`](trait.HtmlExtractor.html) is neither a parser nor a deserializer.
@@ -66,8 +67,6 @@
 //! }
 //! ```
 
-
-extern crate html_extractor_macros;
 #[doc(hidden)]
 pub extern crate lazy_static;
 #[doc(hidden)]

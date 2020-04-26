@@ -36,23 +36,27 @@ impl TokenStreamIterExt for TokenStreamIter {
         self.peek().is_none()
     }
     fn peek_ex(&mut self, expected: &str) -> &TokenTree {
-        self.peek().expect(&format!("expected {}", expected))
+        self.peek()
+            .unwrap_or_else(|| panic!("expected {}", expected))
     }
     fn peek_ex_str(&mut self, expected: &str) -> String {
         self.peek()
-            .expect(&format!("expected {}", expected))
+            .unwrap_or_else(|| panic!("expected {}", expected))
             .to_string()
     }
     fn next_ex(&mut self, expected: &str) -> TokenTree {
-        self.next().expect(&format!("expected {}", expected))
+        self.next()
+            .unwrap_or_else(|| panic!("expected {}", expected))
     }
     fn next_ex_str(&mut self, expected: &str) -> String {
         self.next()
-            .expect(&format!("expected {}", expected))
+            .unwrap_or_else(|| panic!("expected {}", expected))
             .to_string()
     }
     fn expect(&mut self, expect: &str) {
-        let next = self.next().expect(&format!("expected `{}`", expect));
+        let next = self
+            .next()
+            .unwrap_or_else(|| panic!("expected `{}`", expect));
         if next.to_string() != expect {
             abort!(next, "expected `{}`, found `{}`", expect, next);
         }
@@ -87,7 +91,7 @@ impl Visibility {
                 match ts.peek_ex("`(crate)`, `(super)`, `(in SimplePath)` or identifier") {
                     Group(g) if g.delimiter() == Delimiter::Parenthesis => {
                         iter_advance = 1;
-                        Visibility::PublicIn(g.stream().into())
+                        Visibility::PublicIn(g.stream())
                     }
                     _ => {
                         iter_advance = 0;
@@ -384,7 +388,7 @@ impl Extractor {
                         tt if tt.to_string() == "of" => "0".parse().unwrap(),
                         tt => abort!(tt, "expected `[..]` or `of`, found {}", tt),
                     };
-                    
+
                     let selector = extractor_ts.next_ex("literal string").clone();
                     target = Some(ExtractTarget::TextNode(nth, selector));
                 }
