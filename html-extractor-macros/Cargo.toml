@@ -3,6 +3,10 @@ name = "html-extractor-macros"
 version = "0.1.0"
 authors = ["mkihr"]
 edition = "2018"
+description = "This crate is for crate html-extractor"
+repository = "https://github.com/mkihr-ojisan/html-extractor"
+license = "MIT"
+readme = "README.md"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [dependencies]

@@ -1,3 +1,4 @@
 /target
 Cargo.lock
 /html-extractor-macros/target
+/html-extractor/target
