@@ -1,8 +1,15 @@
 # html-extractor
+
 A Rust crate for extracting data from HTML.
 
+[crates.io](https://crates.io/crates/html-extractor)  
+[github](https://github.com/mkihr-ojisan/html-extractor)  
+[documentation](https://docs.rs/html-extractor/0.1.0/html_extractor/)
+
 ## Examples
+
 ### Extracting a simple value from HTML
+
 ```rust
 use html_extractor::{html_extractor, HtmlExtractor};
 html_extractor! {
@@ -22,6 +29,7 @@ fn main() {
 ```
 
 ### Extracting a collection from HTML
+
 ```rust
 use html_extractor::{html_extractor, HtmlExtractor};
 html_extractor! {
@@ -44,6 +52,7 @@ fn main() {
 ```
 
 ### Extracting with regex
+
 ```rust
 use html_extractor::{html_extractor, HtmlExtractor};
 html_extractor! {
