@@ -1,6 +1,6 @@
 [package]
 name = "html-extractor-macros"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["mkihr"]
 edition = "2018"
 description = "This crate is for crate html-extractor"

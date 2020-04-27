@@ -1,6 +1,6 @@
 [package]
 name = "html-extractor"
-version = "0.1.1"
+version = "0.2.0"
 authors = ["mkihr"]
 edition = "2018"
 description = "A Rust crate for extracting data from HTML"
