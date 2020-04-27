@@ -1,10 +1,10 @@
 # html-extractor
 
-A Rust crate for extracting data from HTML.
+![Rust](https://github.com/mkihr-ojisan/html-extractor/workflows/Rust/badge.svg)
+[![html-extractor at crates.io](https://img.shields.io/crates/v/html-extractor.svg)](https://crates.io/crates/html-extractor)
+[![html-extractor at docs.rs](https://docs.rs/html-extractor/badge.svg)](https://docs.rs/html-extractor)
 
-[crates.io](https://crates.io/crates/html-extractor)  
-[github](https://github.com/mkihr-ojisan/html-extractor)  
-[documentation](https://docs.rs/html-extractor/0.1.0/html_extractor/)
+A Rust crate for extracting data from HTML.
 
 ## Examples
 
