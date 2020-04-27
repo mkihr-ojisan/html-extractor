@@ -73,6 +73,11 @@ fn main() {
 
 ## Changelog
 
+### v0.2.0
+
+- Rename "collect specifier" to "collector specifier"
+- Add "optional" collector
+
 ### v0.1.1
 
 - Fix the links in the documentation
