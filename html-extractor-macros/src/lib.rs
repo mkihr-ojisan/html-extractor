@@ -345,7 +345,7 @@ impl SingleField {
 struct Extractor {
     target: ExtractTarget,
     capture: Option<TokenTree>,
-    collect: bool,
+    collector: ExtractCollector,
 }
 impl Extractor {
     fn parse(ts: &mut TokenStreamIter) -> Self {
@@ -359,7 +359,7 @@ impl Extractor {
 
         let mut target = None;
         let mut capture = None;
-        let mut collect = false;
+        let mut collector = ExtractCollector::First;
 
         while !extractor_ts.is_finished() {
             match &*extractor_ts.next_ex_str("`elem`, `attr`, `text`, `capture` or `collect`") {
@@ -398,7 +398,10 @@ impl Extractor {
                     capture = Some(regex);
                 }
                 "collect" => {
-                    collect = true;
+                    collector = ExtractCollector::IntoIterator;
+                }
+                "optional" => {
+                    collector = ExtractCollector::Option;
                 }
                 tt => abort!(
                     tt,
@@ -426,7 +429,7 @@ impl Extractor {
         Extractor {
             target,
             capture,
-            collect,
+            collector,
         }
     }
     fn to_tokens(&self, struct_name: &TokenTree, field_name: &TokenTree) -> TokenStream {
@@ -551,39 +554,53 @@ impl Extractor {
             },
         };
 
-        let extract_data_ts = if self.collect {
-            quote! {
-                let mut items = Vec::new();
-                for target_elem in __elem.select(&*SELECTOR) {
-                    let item = {
-                        #extract_data_from_elem_ts
-                        #parse_data_ts
-                    };
-                    items.push(item);
+        let collector_ts = match &self.collector {
+            ExtractCollector::First => {
+                quote! {
+                    let target_elem = __elem.select(&*SELECTOR).next().ok_or(
+                        #_crate::error::ErrorKind::InvalidInput(
+                            ::std::borrow::Cow::Borrowed(::std::concat!(
+                                "extracting the data of field `",
+                                ::std::stringify!(#field_name),
+                                "` in struct `",
+                                ::std::stringify!(#struct_name),
+                                "`, no element matched the selector"
+                            ))
+                        )
+                    )?;
+                    #extract_data_from_elem_ts
+                    #parse_data_ts
                 }
-                items.into_iter().collect()
             }
-        } else {
-            quote! {
-                let target_elem = __elem.select(&*SELECTOR).next().ok_or(
-                    #_crate::error::ErrorKind::InvalidInput(
-                        ::std::borrow::Cow::Borrowed(::std::concat!(
-                            "extracting the data of field `",
-                            ::std::stringify!(#field_name),
-                            "` in struct `",
-                            ::std::stringify!(#struct_name),
-                            "`, no element matched the selector"
-                        ))
-                    )
-                )?;
-                #extract_data_from_elem_ts
-                #parse_data_ts
+            ExtractCollector::IntoIterator => {
+                quote! {
+                    let mut items = Vec::new();
+                    for target_elem in __elem.select(&*SELECTOR) {
+                        let item = {
+                            #extract_data_from_elem_ts
+                            #parse_data_ts
+                        };
+                        items.push(item);
+                    }
+                    items.into_iter().collect()
+                }
+            }
+            ExtractCollector::Option => {
+                quote! {
+                    match __elem.select(&*SELECTOR).next() {
+                        Some(target_elem) => Some({
+                            #extract_data_from_elem_ts
+                            #parse_data_ts
+                        }),
+                        None => None,
+                    }
+                }
             }
         };
 
         quote! {{
             #lazy_static_ts
-            #extract_data_ts
+            #collector_ts
         }}
     }
 }
@@ -603,6 +620,15 @@ impl ExtractTarget {
             ExtractTarget::TextNode(_, s) => s,
         }
     }
+}
+
+enum ExtractCollector {
+    //extracts only the first data
+    First,
+    //extracts all the data and collects into the type that implements IntoIterator,
+    IntoIterator,
+    //emits Some(..) if the data exist, None if not
+    Option,
 }
 
 fn get_literal_str_value(tt: &TokenTree) -> String {

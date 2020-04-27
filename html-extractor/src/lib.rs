@@ -221,9 +221,11 @@ pub mod error;
 /// }
 /// ```
 ///
-/// ### Collect specifier
-/// Iterates all the targets specified by [target specifier](#target-specifier) and collects into the type of the field.
-/// The type must be an implementor of [`FromIterator`](std::iter::FromIterator) like [`Vec`](std::vec::Vec).
+/// ### Collector specifier
+/// Collector specifier specifies how to collect HTML elements.  
+/// The default collector is "first", which collects only the first matched element.  
+/// The "collect" collector collects all the element into the type that implements [`FromIterator`](std::iter::FromIterator).  
+/// The "optional" collector collects the first element if it exists. If not, it emits `None`.
 /// ```
 /// use html_extractor::{html_extractor, HtmlExtractor};
 /// html_extractor! {
@@ -241,6 +243,9 @@ pub mod error;
 ///         // captures three data from each string with the regex "baz=(.*), qux=(.*), corge=(.*)" ,
 ///         // and collects into `Vec<(usize, usize, usize)>`
 ///         baz_qux_corge: Vec<(usize, usize, usize)> = (text of ".baz-qux-corge", capture with "baz=(.*), qux=(.*), corge=(.*)", collect),
+/// 
+///         // optionally extracts the first text node in the first element that matches the selector ".grault".
+///         grault: Option<usize> = (text of ".grault", optional),
 ///     }
 ///     #[derive(Debug, PartialEq)]
 ///     Bar {
@@ -275,6 +280,7 @@ pub mod error;
 ///             Bar { bar: 4 },
 ///         ],
 ///         baz_qux_corge: vec![(1, 2, 3), (4, 5, 6), (7, 8, 9), (10, 11, 12)],
+///         grault: None,
 ///     });
 /// }
 /// ```

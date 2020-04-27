@@ -87,6 +87,22 @@ fn test() {
         data12_3: 46,
         data13: vec![(1, 5, 9, 13), (2, 6, 10, 14), (3, 7, 11, 15), (4, 8, 12, 16)],
         data14: vec![(1, 5, 9, 13, 17), (2, 6, 10, 14, 18), (3, 7, 11, 15, 19), (4, 8, 12, 16, 20)],
+
+        optional_data1: Some(InnerData { data1_1: 1 }),
+        optional_data2: Some(2),
+        optional_data3: Some(3),
+        optional_data7: Some((7,)),
+        optional_data8: Some((8,)),
+        optional_data11: Some((7, 27)),
+        optional_data12: Some((8, 18, 46)),
+
+        none1: None,
+        none2: None,
+        none3: None,
+        none4: None,
+        none5: None,
+        none6: None,
+        none7: None,
     });
 }
 html_extractor::html_extractor! {
@@ -111,6 +127,22 @@ html_extractor::html_extractor! {
 
         data13: Vec<(usize, usize, usize, usize)> = (text of "#data13 > div", capture with "%%%(.*)%%%(.*)%%%(.*)%%%(.*)%%%", collect),
         data14: Vec<(usize, usize, usize, usize, usize)> = (attr["data-14"] of "#data14 > div", capture with "%%%(.*)%%%(.*)%%%(.*)%%%(.*)%%%(.*)%%%", collect),
+
+        optional_data1: Option<InnerData> = (elem of "#data1", optional),
+        optional_data2: Option<usize> = (text of "#data2", optional),
+        optional_data3: Option<usize> = (attr["data-3"] of "#data3", optional),
+        optional_data7: Option<(usize,)> = (text of "#data7", capture with "%%%(.*)%%%", optional),
+        optional_data8: Option<(usize,)> = (attr["data-8"] of "#data8", capture with "%%%(.*)%%%", optional),
+        optional_data11: Option<(usize, usize)> = (text[2] of "#data11", capture with "%%%(.*)%%%(.*)%%%", optional),
+        optional_data12: Option<(usize, usize, usize)> = (attr["data-12"] of "#data12", capture with "%%%(.*)%%%(.*)%%%(.*)%%%", optional),
+
+        none1: Option<usize> = (text of "#none", optional),
+        none2: Option<usize> = (attr["none"] of "#none", optional),
+        none3: Option<InnerData> = (elem of "#none", optional),
+        none4: Option<(usize,)> = (text of "#none", capture with "(none)", optional),
+        none5: Option<(usize,)> = (attr["none"] of "#none", capture with "(none)", optional),
+        none6: Option<usize> = (text[3] of "#none", optional),
+        none7: Option<(usize,)> = (text[3] of "#none", capture with "(none)", optional),
     }
     #[derive(Debug, PartialEq)]
     pub(crate) InnerData {
