@@ -70,3 +70,9 @@ fn main() {
     assert_eq!(foo, Foo { foo: 1 });
 }
 ```
+
+## Changelog
+
+### v0.1.1
+
+- Fix the links in the documentation
