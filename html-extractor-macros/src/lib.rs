@@ -362,7 +362,9 @@ impl Extractor {
         let mut collector = ExtractCollector::First;
 
         while !extractor_ts.is_finished() {
-            match &*extractor_ts.next_ex_str("`elem`, `attr`, `text`, `capture` or `collect`") {
+            match &*extractor_ts
+                .next_ex_str("`elem`, `attr`, `text`, `capture`, `collect` or `optional`")
+            {
                 "elem" => {
                     extractor_ts.expect("of");
                     let selector = extractor_ts.next_ex("literal string").clone();
