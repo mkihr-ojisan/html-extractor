@@ -487,7 +487,7 @@ impl Extractor {
                 )?;
             },
             ExtractTarget::TextNode { nth, .. } => quote! {
-                let data = target_elem.text().nth(#nth).ok_or(
+                let data_whitespace = target_elem.text().nth(#nth).ok_or(
                     #_crate::error::ErrorKind::InvalidInput(
                         ::std::borrow::Cow::Borrowed(::std::concat!(
                             "extracting the data of field `",
@@ -500,6 +500,7 @@ impl Extractor {
                         ))
                     )
                 )?;
+                let data = data_whitespace.trim();
             },
         };
 
