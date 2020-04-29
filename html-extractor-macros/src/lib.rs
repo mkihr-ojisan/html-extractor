@@ -187,9 +187,9 @@ impl ToTokens for Struct {
                 #(#field_def)*
             }
             impl #_crate::HtmlExtractor for #name {
-                fn extract(__elem: &#_crate::scraper::ElementRef) -> Result<Self, #_crate::Error> {
+                fn extract(__elem: &#_crate::scraper::ElementRef) -> ::std::result::Result<Self, #_crate::Error> {
                     #(#field_extract)*
-                    Ok(Self {
+                    ::std::result::Result::Ok(Self {
                         #(#field_init)*
                     })
                 }
@@ -503,7 +503,7 @@ impl Extractor {
                 let mut captures = Vec::new();
                 for i in 1..regex_captures_len.unwrap() {
                     captures.push(quote! {
-                        caps.get(#i).unwrap().as_str().parse().or_else(|e| Err(
+                        caps.get(#i).unwrap().as_str().parse().or_else(|e| ::std::result::Result::Err(
                             #_crate::error::ErrorKind::InvalidInput(
                                 ::std::borrow::Cow::Owned(::std::format!(::std::concat!(
                                     "extracting the data of field `",
@@ -540,8 +540,8 @@ impl Extractor {
                     #_crate::HtmlExtractor::extract(&data)?
                 },
                 _ => quote! {
-                    data.parse().or_else(|e| Err(#_crate::error::ErrorKind::InvalidInput(
-                            ::std::borrow::Cow::Owned(format!(::std::concat!(
+                    data.parse().or_else(|e| ::std::result::Result::Err(#_crate::error::ErrorKind::InvalidInput(
+                            ::std::borrow::Cow::Owned(::std::format!(::std::concat!(
                                 "extracting the data of field `",
                                 ::std::stringify!(#field_name),
                                 "` in struct `",
@@ -574,7 +574,7 @@ impl Extractor {
             }
             ExtractCollector::IntoIterator => {
                 quote! {
-                    let mut items = Vec::new();
+                    let mut items = ::std::vec::Vec::new();
                     for target_elem in __elem.select(&*SELECTOR) {
                         let item = {
                             #extract_data_from_elem_ts
