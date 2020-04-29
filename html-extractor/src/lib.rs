@@ -138,6 +138,8 @@ pub mod error;
 /// If `text of ..` or `attr[..] of ..` is used, the type of field must implement [`FromStr`](std::str::FromStr).
 ///
 /// If `elem of ..` is used, the type of field must implement [`HtmlExtractor`].
+///
+/// If `text of ..` is used, leading and trailing whitespace removed from the extracted string.
 /// ```
 /// use html_extractor::{html_extractor, HtmlExtractor};
 /// html_extractor! {
@@ -151,6 +153,8 @@ pub mod error;
 ///         baz: usize = (attr["data-baz"] of "#baz"),
 ///         // extracts an element that first matched the selector "#qux" and parse it with `HtmlExtractor::extract()`
 ///         qux: Qux = (elem of "#qux"),
+///         // extracts inner HTML of the element that first matched the selector "#grault",
+///         grault: String = (inner_html of "#grault"),
 ///     }
 ///     #[derive(Debug, PartialEq)]
 ///     Qux {
@@ -166,6 +170,9 @@ pub mod error;
 ///         <div id="qux">
 ///             <div id="corge">4</div>
 ///         </div>
+///         <div id="grault">
+///             inner<br>html
+///         </div>
 ///     "#;
 ///     let foo = Foo::extract_from_str(input).unwrap();
 ///     assert_eq!(foo, Foo {
@@ -173,6 +180,7 @@ pub mod error;
 ///         bar: 2,
 ///         baz: 3,
 ///         qux: Qux { corge: 4 },
+///         grault: "inner<br>html".to_owned(),
 ///     });
 /// }
 /// ```
