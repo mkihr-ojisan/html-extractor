@@ -73,6 +73,10 @@ fn main() {
 
 ## Changelog
 
+### v0.2.1
+
+- Fix the internal usage of the rust standard library
+
 ### v0.2.0
 
 - Rename "collect specifier" to "collector specifier"
