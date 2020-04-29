@@ -362,9 +362,9 @@ impl Extractor {
         let mut collector = ExtractCollector::First;
 
         while !extractor_ts.is_finished() {
-            match &*extractor_ts
-                .next_ex_str("`elem`, `attr`, `text`, `capture`, `collect` or `optional`")
-            {
+            match &*extractor_ts.next_ex_str(
+                "`elem`, `attr`, `text`, `inner_html`, `capture`, `collect` or `optional`",
+            ) {
                 "elem" => {
                     extractor_ts.expect("of");
                     let selector = extractor_ts.next_ex("literal string").clone();
@@ -396,6 +396,11 @@ impl Extractor {
 
                     let selector = extractor_ts.next_ex("literal string").clone();
                     target = Some(ExtractTarget::TextNode { nth, selector });
+                }
+                "inner_html" => {
+                    extractor_ts.expect("of");
+                    let selector = extractor_ts.next_ex("literal string").clone();
+                    target = Some(ExtractTarget::InnerHTML { selector });
                 }
                 "capture" => {
                     extractor_ts.expect("with");
@@ -500,6 +505,10 @@ impl Extractor {
                         ))
                     )
                 )?;
+                let data = data_whitespace.trim();
+            },
+            ExtractTarget::InnerHTML { .. } => quote! {
+                let data_whitespace = target_elem.inner_html();
                 let data = data_whitespace.trim();
             },
         };
@@ -622,6 +631,9 @@ enum ExtractTarget {
         nth: TokenStream,
         selector: TokenTree,
     },
+    InnerHTML {
+        selector: TokenTree,
+    },
 }
 impl ExtractTarget {
     fn selector(&self) -> &TokenTree {
@@ -629,6 +641,7 @@ impl ExtractTarget {
             ExtractTarget::Element { selector } => selector,
             ExtractTarget::Attribute { selector, .. } => selector,
             ExtractTarget::TextNode { selector, .. } => selector,
+            ExtractTarget::InnerHTML { selector } => selector,
         }
     }
 }

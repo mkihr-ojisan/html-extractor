@@ -65,6 +65,9 @@ fn test() {
                 <div data-14="%%%3%%%7%%%11%%%15%%%19%%%"></div>
                 <div data-14="%%%4%%%8%%%12%%%16%%%20%%%"></div>
             </div>
+            <div id="data15">
+                inner<br>html
+            </div>
         "#,
     )
     .unwrap();
@@ -103,6 +106,8 @@ fn test() {
         none5: None,
         none6: None,
         none7: None,
+
+        data15: "inner<br>html".to_owned(),
     });
 }
 html_extractor::html_extractor! {
@@ -143,6 +148,8 @@ html_extractor::html_extractor! {
         none5: Option<(usize,)> = (attr["none"] of "#none", capture with "(none)", optional),
         none6: Option<usize> = (text[3] of "#none", optional),
         none7: Option<(usize,)> = (text[3] of "#none", capture with "(none)", optional),
+
+        data15: String = (inner_html of "#data15"),
     }
     #[derive(Debug, PartialEq)]
     pub(crate) InnerData {
