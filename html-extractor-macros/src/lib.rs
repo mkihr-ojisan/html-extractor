@@ -366,10 +366,10 @@ impl Extractor {
                 "elem" => {
                     extractor_ts.expect("of");
                     let selector = extractor_ts.next_ex("literal string").clone();
-                    target = Some(ExtractTarget::Element(selector));
+                    target = Some(ExtractTarget::Element { selector });
                 }
                 "attr" => {
-                    let attr = match extractor_ts.next_ex("`[..]`") {
+                    let attribute = match extractor_ts.next_ex("`[..]`") {
                         Group(g) if g.delimiter() == Delimiter::Bracket => {
                             g.stream().into_iter().peekable().next_ex("literal string")
                         }
@@ -377,7 +377,10 @@ impl Extractor {
                     };
                     extractor_ts.expect("of");
                     let selector = extractor_ts.next_ex("literal string").clone();
-                    target = Some(ExtractTarget::Attribute(attr, selector));
+                    target = Some(ExtractTarget::Attribute {
+                        attribute,
+                        selector,
+                    });
                 }
                 "text" => {
                     let nth = match extractor_ts.next_ex("`[..]` or `of`") {
@@ -390,7 +393,7 @@ impl Extractor {
                     };
 
                     let selector = extractor_ts.next_ex("literal string").clone();
-                    target = Some(ExtractTarget::TextNode(nth, selector));
+                    target = Some(ExtractTarget::TextNode { nth, selector });
                 }
                 "capture" => {
                     extractor_ts.expect("with");
@@ -417,7 +420,7 @@ impl Extractor {
             None => abort!(extractor_tt, "target is not specified"),
         };
 
-        if let ExtractTarget::Element(_) = &target {
+        if let ExtractTarget::Element { .. } = &target {
             if capture.is_some() {
                 abort!(
                     extractor_tt,
@@ -463,11 +466,11 @@ impl Extractor {
         };
 
         let extract_data_from_elem_ts = match &self.target {
-            ExtractTarget::Element(_) => quote! {
+            ExtractTarget::Element { .. } => quote! {
                 let data = target_elem;
             },
-            ExtractTarget::Attribute(attr, _) => quote! {
-                let data = target_elem.value().attr(#attr).ok_or(
+            ExtractTarget::Attribute { attribute, .. } => quote! {
+                let data = target_elem.value().attr(#attribute).ok_or(
                     #_crate::error::ErrorKind::InvalidInput(
                         ::std::borrow::Cow::Borrowed(::std::concat!(
                             "extracting the data of field `",
@@ -475,13 +478,13 @@ impl Extractor {
                             "` in struct `",
                             ::std::stringify!(#struct_name),
                             "`, attribute `",
-                            #attr,
+                            #attribute,
                             "` is not found"
                         ))
                     )
                 )?;
             },
-            ExtractTarget::TextNode(nth, _) => quote! {
+            ExtractTarget::TextNode { nth, .. } => quote! {
                 let data = target_elem.text().nth(#nth).ok_or(
                     #_crate::error::ErrorKind::InvalidInput(
                         ::std::borrow::Cow::Borrowed(::std::concat!(
@@ -536,7 +539,7 @@ impl Extractor {
                 }
             }
             None => match &self.target {
-                ExtractTarget::Element(_) => quote! {
+                ExtractTarget::Element { .. } => quote! {
                     #_crate::HtmlExtractor::extract(&data)?
                 },
                 _ => quote! {
@@ -605,19 +608,24 @@ impl Extractor {
     }
 }
 enum ExtractTarget {
-    //0 = selector
-    Element(TokenTree),
-    //0 = attribute, 1 = selector
-    Attribute(TokenTree, TokenTree),
-    //0 = nth, 1 = selector
-    TextNode(TokenStream, TokenTree),
+    Element {
+        selector: TokenTree,
+    },
+    Attribute {
+        attribute: TokenTree,
+        selector: TokenTree,
+    },
+    TextNode {
+        nth: TokenStream,
+        selector: TokenTree,
+    },
 }
 impl ExtractTarget {
     fn selector(&self) -> &TokenTree {
         match self {
-            ExtractTarget::Element(s) => s,
-            ExtractTarget::Attribute(_, s) => s,
-            ExtractTarget::TextNode(_, s) => s,
+            ExtractTarget::Element { selector } => selector,
+            ExtractTarget::Attribute { selector, .. } => selector,
+            ExtractTarget::TextNode { selector, .. } => selector,
         }
     }
 }
