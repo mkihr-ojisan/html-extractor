@@ -111,6 +111,7 @@ fn test() {
         data15: "inner<br>html".to_owned(),
         data16_1: std::cmp::Ordering::Less,
         data16_2: std::cmp::Ordering::Less,
+        presence_of_data16: true,
     });
 }
 html_extractor::html_extractor! {
@@ -161,6 +162,8 @@ html_extractor::html_extractor! {
             "=" =>  Ok(std::cmp::Ordering::Equal),
             _ => Err(())
         }),
+
+        presence_of_data16: bool = (presence of "#data16"),
     }
     #[derive(Debug, PartialEq)]
     pub(crate) InnerData {

@@ -361,11 +361,11 @@ impl Extractor {
         let mut target = None;
         let mut capture = None;
         let mut collector = ExtractCollector::First;
-        let mut parser = quote!(::std::str::FromStr::from_str).into_iter().collect();
+        let mut parser = None;
 
         while !extractor_ts.is_finished() {
             match &*extractor_ts.next_ex_str(
-                "`elem`, `attr`, `text`, `inner_html`, `capture`, `collect`, `optional` or `parse`",
+                "`elem`, `attr`, `text`, `inner_html`, `presence`, `capture`, `collect`, `optional` or `parse`",
             ) {
                 "elem" => {
                     extractor_ts.expect("of");
@@ -404,6 +404,11 @@ impl Extractor {
                     let selector = extractor_ts.next_ex("literal string").clone();
                     target = Some(ExtractTarget::InnerHTML { selector });
                 }
+                "presence" => {
+                    extractor_ts.expect("of");
+                    let selector = extractor_ts.next_ex("literal string").clone();
+                    target = Some(ExtractTarget::PresenceOf { selector });
+                }
                 "capture" => {
                     extractor_ts.expect("with");
                     let regex = extractor_ts.next_ex("literal string").clone();
@@ -417,10 +422,11 @@ impl Extractor {
                 }
                 "parse" => {
                     extractor_ts.expect("with");
-                    parser = Vec::new();
+                    let mut parser_vec = Vec::new();
                     while !extractor_ts.is_finished() && extractor_ts.peek_ex_str(",") != "," {
-                        parser.push(extractor_ts.next_ex(","));
+                        parser_vec.push(extractor_ts.next_ex(","));
                     }
+                    parser = Some(parser_vec)
                 }
                 tt => abort!(
                     tt,
@@ -443,13 +449,21 @@ impl Extractor {
                     "`elem of ..` and `capture with ..` cannot be used for the same field"
                 );
             }
+        } else if let ExtractTarget::PresenceOf { .. } = &target {
+            if capture.is_some() || collector != ExtractCollector::First || parser.is_some() {
+                abort!(
+                    extractor_tt,
+                    "`presence of ..` cannot be used with any other specifier"
+                );
+            }
         }
 
         Extractor {
             target,
             capture,
             collector,
-            parser,
+            parser: parser
+                .unwrap_or_else(|| quote!(::std::str::FromStr::from_str).into_iter().collect()),
         }
     }
     fn to_tokens(&self, struct_name: &TokenTree, field_name: &TokenTree) -> TokenStream {
@@ -521,6 +535,9 @@ impl Extractor {
                 let data_whitespace = target_elem.inner_html();
                 let data = data_whitespace.trim();
             },
+            ExtractTarget::PresenceOf { .. } => quote! {
+                let data = presence;
+            },
         };
 
         let parser = &self.parser;
@@ -582,20 +599,26 @@ impl Extractor {
 
         let collector_ts = match &self.collector {
             ExtractCollector::First => {
-                quote! {
-                    let target_elem = __elem.select(&*SELECTOR).next().ok_or(
-                        #_crate::error::ErrorKind::InvalidInput(
-                            ::std::borrow::Cow::Borrowed(::std::concat!(
-                                "extracting the data of field `",
-                                ::std::stringify!(#field_name),
-                                "` in struct `",
-                                ::std::stringify!(#struct_name),
-                                "`, no element matched the selector"
-                            ))
-                        )
-                    )?;
-                    #extract_data_from_elem_ts
-                    #parse_data_ts
+                if let ExtractTarget::PresenceOf { .. } = &self.target {
+                    quote! {
+                        __elem.select(&*SELECTOR).next().is_some()
+                    }
+                } else {
+                    quote! {
+                        let target_elem = __elem.select(&*SELECTOR).next().ok_or(
+                            #_crate::error::ErrorKind::InvalidInput(
+                                ::std::borrow::Cow::Borrowed(::std::concat!(
+                                    "extracting the data of field `",
+                                    ::std::stringify!(#field_name),
+                                    "` in struct `",
+                                    ::std::stringify!(#struct_name),
+                                    "`, no element matched the selector"
+                                ))
+                            )
+                        )?;
+                        #extract_data_from_elem_ts
+                        #parse_data_ts
+                    }
                 }
             }
             ExtractCollector::IntoIterator => {
@@ -645,6 +668,9 @@ enum ExtractTarget {
     InnerHTML {
         selector: TokenTree,
     },
+    PresenceOf {
+        selector: TokenTree,
+    },
 }
 impl ExtractTarget {
     fn selector(&self) -> &TokenTree {
@@ -653,10 +679,12 @@ impl ExtractTarget {
             ExtractTarget::Attribute { selector, .. } => selector,
             ExtractTarget::TextNode { selector, .. } => selector,
             ExtractTarget::InnerHTML { selector } => selector,
+            ExtractTarget::PresenceOf { selector } => selector,
         }
     }
 }
 
+#[derive(PartialEq)]
 enum ExtractCollector {
     //extracts only the first data
     First,

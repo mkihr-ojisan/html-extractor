@@ -133,13 +133,11 @@ pub mod error;
 /// ### Target specifier
 /// Target specifier specifies a selector to select an element (or elements) and what of the selected element is extracted.
 ///
-/// If the specified selector is invalid, it will be a compile error.
-///
-/// If `text of ..` or `attr[..] of ..` is used, the type of field must implement [`FromStr`](std::str::FromStr).
-///
-/// If `elem of ..` is used, the type of field must implement [`HtmlExtractor`].
-///
-/// If `text of ..` is used, leading and trailing whitespace removed from the extracted string.
+/// If the specified selector is invalid, it will be a compile error.  
+/// If `text of ..` or `attr[..] of ..` is used, the type of field must implement [`FromStr`](std::str::FromStr).  
+/// If `elem of ..` is used, the type of field must implement [`HtmlExtractor`].  
+/// If `text of ..` is used, leading and trailing whitespace removed from the extracted string.  
+/// If `presence of ..` is used, the type must be `bool` and any other specifier cannot be used,
 /// ```
 /// use html_extractor::{html_extractor, HtmlExtractor};
 /// html_extractor! {
@@ -155,6 +153,8 @@ pub mod error;
 ///         qux: Qux = (elem of "#qux"),
 ///         // extracts inner HTML of the element that first matched the selector "#grault",
 ///         grault: String = (inner_html of "#grault"),
+///         // stores if the elements that matches the selector "#garply" exist.
+///         garply: bool = (presence of "#garply"),
 ///     }
 ///     #[derive(Debug, PartialEq)]
 ///     Qux {
@@ -181,6 +181,7 @@ pub mod error;
 ///         baz: 3,
 ///         qux: Qux { corge: 4 },
 ///         grault: "inner<br>html".to_owned(),
+///         garply: false,
 ///     });
 /// }
 /// ```
