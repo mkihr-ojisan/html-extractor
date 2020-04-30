@@ -73,6 +73,10 @@ fn main() {
 
 ## Changelog
 
+### v0.4.0
+
+- Add `presence of ..` target specifier
+
 ### v0.3.0
 
 - Add parser specifier
