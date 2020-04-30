@@ -73,6 +73,13 @@ fn main() {
 
 ## Changelog
 
+### v0.3.0
+
+- Add parser specifier
+- Add `inner_html` target specifier
+- Change the behavior when extracting text nodes to remove spaces at both ends.
+- Fix error message
+
 ### v0.2.1
 
 - Fix the internal usage of the rust standard library
