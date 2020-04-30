@@ -68,6 +68,7 @@ fn test() {
             <div id="data15">
                 inner<br>html
             </div>
+            <div id="data16">&lt;</div>
         "#,
     )
     .unwrap();
@@ -108,6 +109,8 @@ fn test() {
         none7: None,
 
         data15: "inner<br>html".to_owned(),
+        data16_1: std::cmp::Ordering::Less,
+        data16_2: std::cmp::Ordering::Less,
     });
 }
 html_extractor::html_extractor! {
@@ -150,9 +153,25 @@ html_extractor::html_extractor! {
         none7: Option<(usize,)> = (text[3] of "#none", capture with "(none)", optional),
 
         data15: String = (inner_html of "#data15"),
+        
+        data16_1: std::cmp::Ordering = (text of "#data16", parse with custom_parser),
+        data16_2: std::cmp::Ordering = (text of "#data16", parse with |input| match input {
+            ">" => Ok(std::cmp::Ordering::Greater),
+            "<" =>  Ok(std::cmp::Ordering::Less),
+            "=" =>  Ok(std::cmp::Ordering::Equal),
+            _ => Err(())
+        }),
     }
     #[derive(Debug, PartialEq)]
     pub(crate) InnerData {
         data1_1: usize = (text of ".data1-1")
+    }
+}
+fn custom_parser(input: &str) -> Result<std::cmp::Ordering, ()> {
+    match input {
+        ">" => Ok(std::cmp::Ordering::Greater),
+        "<" =>  Ok(std::cmp::Ordering::Less),
+        "=" =>  Ok(std::cmp::Ordering::Equal),
+        _ => Err(())
     }
 }

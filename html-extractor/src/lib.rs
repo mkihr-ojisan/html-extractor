@@ -127,7 +127,7 @@ pub mod error;
 /// 
 /// ## Extractor part of field definitions
 /// The extractor part of field definitions specifies how to extract data from HTML.
-/// Extractor consists of [Target](#target-specifier), [Capture](#capture-specifier) and [Collect](#collect-specifier) specifier.
+/// Extractor consists of [Target](#target-specifier), [Capture](#capture-specifier), [Collector](#collector-specifier) and [Parser](#parser-specifier) specifier.
 ///
 /// The order of specifiers does not matter. If the same specifier is written multiple times, the one given later applies.
 /// ### Target specifier
@@ -292,6 +292,34 @@ pub mod error;
 ///     });
 /// }
 /// ```
+/// ### Parser specifier
+/// Parser specifier specifies the parser used to parse the extracted string.  
+/// The default parser is [`::std::str::FromStr::from_str`].  
+/// The parser must be `Fn(&str) -> Result<_, T> where T: std::fmt::Debug`
+/// ```
+/// use html_extractor::{html_extractor, HtmlExtractor};
+/// html_extractor! {
+///     #[derive(Debug, PartialEq)]
+///     Foo {
+///         // extracts using a custom parser.
+///         foo: usize = (text of "#foo", parse with custom_parser),
+///     }
+/// }
+/// fn custom_parser(input: &str) -> Result<usize, std::num::ParseIntError> {
+///     input.replace(",", "").parse()
+/// }
+///
+/// fn main() {
+///     let input = r#"
+///         <div id="foo">1,000,000,000</div>
+///     "#;
+///     let foo = Foo::extract_from_str(input).unwrap();
+///     assert_eq!(foo, Foo {
+///         foo: 1000000000,
+///     });
+/// }
+/// ```
+/// 
 /// # Usage of the generated structures
 /// The generated structures implement trait [`HtmlExtractor`].
 /// See the document of the trait.

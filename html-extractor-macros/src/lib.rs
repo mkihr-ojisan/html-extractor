@@ -346,6 +346,7 @@ struct Extractor {
     target: ExtractTarget,
     capture: Option<TokenTree>,
     collector: ExtractCollector,
+    parser: Vec<TokenTree>,
 }
 impl Extractor {
     fn parse(ts: &mut TokenStreamIter) -> Self {
@@ -360,10 +361,11 @@ impl Extractor {
         let mut target = None;
         let mut capture = None;
         let mut collector = ExtractCollector::First;
+        let mut parser = quote!(::std::str::FromStr::from_str).into_iter().collect();
 
         while !extractor_ts.is_finished() {
             match &*extractor_ts.next_ex_str(
-                "`elem`, `attr`, `text`, `inner_html`, `capture`, `collect` or `optional`",
+                "`elem`, `attr`, `text`, `inner_html`, `capture`, `collect`, `optional` or `parse`",
             ) {
                 "elem" => {
                     extractor_ts.expect("of");
@@ -413,6 +415,13 @@ impl Extractor {
                 "optional" => {
                     collector = ExtractCollector::Option;
                 }
+                "parse" => {
+                    extractor_ts.expect("with");
+                    parser = Vec::new();
+                    while !extractor_ts.is_finished() && extractor_ts.peek_ex_str(",") != "," {
+                        parser.push(extractor_ts.next_ex(","));
+                    }
+                }
                 tt => abort!(
                     tt,
                     "expected `elem`, `attr`, `text`, `capture` or `collect`, found `{}`",
@@ -440,6 +449,7 @@ impl Extractor {
             target,
             capture,
             collector,
+            parser,
         }
     }
     fn to_tokens(&self, struct_name: &TokenTree, field_name: &TokenTree) -> TokenStream {
@@ -513,12 +523,13 @@ impl Extractor {
             },
         };
 
+        let parser = &self.parser;
         let parse_data_ts = match &self.capture {
             Some(_) => {
                 let mut captures = Vec::new();
                 for i in 1..regex_captures_len.unwrap() {
                     captures.push(quote! {
-                        caps.get(#i).unwrap().as_str().parse().or_else(|e| ::std::result::Result::Err(
+                        (#(#parser)*)(caps.get(#i).unwrap().as_str()).or_else(|e| ::std::result::Result::Err(
                             #_crate::error::ErrorKind::InvalidInput(
                                 ::std::borrow::Cow::Owned(::std::format!(::std::concat!(
                                     "extracting the data of field `",
@@ -527,7 +538,7 @@ impl Extractor {
                                     ::std::stringify!(#struct_name),
                                     "`, cannot parse for the ",
                                     ::std::stringify!(#i),
-                                    "th field: {}"
+                                    "th field: {:#?}"
                                 ), e))
                             )
                         ))?
@@ -555,13 +566,13 @@ impl Extractor {
                     #_crate::HtmlExtractor::extract(&data)?
                 },
                 _ => quote! {
-                    data.parse().or_else(|e| ::std::result::Result::Err(#_crate::error::ErrorKind::InvalidInput(
+                    (#(#parser)*)(data).or_else(|e| ::std::result::Result::Err(#_crate::error::ErrorKind::InvalidInput(
                             ::std::borrow::Cow::Owned(::std::format!(::std::concat!(
                                 "extracting the data of field `",
                                 ::std::stringify!(#field_name),
                                 "` in struct `",
                                 ::std::stringify!(#struct_name),
-                                "`, cannot parse `{}`: {}",
+                                "`, cannot parse `{}`: {:#?}",
                             ), data, e))
                         )
                     ))?
