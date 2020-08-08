@@ -73,6 +73,10 @@ fn main() {
 
 ## Changelog
 
+### v1.0.0
+
+- Use `thiserror` instead of `failure`
+
 ### v0.4.0
 
 - Add `presence of ..` target specifier
