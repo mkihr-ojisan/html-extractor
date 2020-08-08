@@ -1,6 +1,6 @@
 #![allow(clippy::needless_doctest_main)]
 //! This crate provides an easy way to extract data from HTML.
-//! 
+//!
 //! [`HtmlExtractor`] is neither a parser nor a deserializer.
 //! It picks up only the desired data from HTML.
 //!
@@ -79,7 +79,7 @@ pub mod error;
 /// Generates structures that implement [`HtmlExtractor`].
 ///
 /// # Syntax
-/// 
+///
 /// ## Defining structures
 /// In this macro, zero or more structures can be defined.
 ///
@@ -99,13 +99,13 @@ pub mod error;
 ///     }
 /// }
 /// ```
-/// 
+///
 /// ## Defining fields in structures
 /// There are two types of fields, "single field" and "tuple field".
 /// Tuple fields are used to [capture data with regex](#capture-specifier).
-/// 
+///
 /// Each field definition has a declaration part and an [extractor](#extractor-part-of-field-definitions) part.
-/// 
+///
 /// Attributes can be attached to the fields, but currently attributes that may remove the fields (like `#[cfg]`) will not work.
 /// ```no_run
 /// # use html_extractor::html_extractor;
@@ -116,7 +116,7 @@ pub mod error;
 ///         pub foo: usize = (text of "#foo"),
 ///         //^^^^^^^^^^^^   ^^^^^^^^^^^^^^^^
 ///         // declaration   extractor
-/// 
+///
 ///         //tuple field
 ///         (pub bar: usize, pub baz: usize) = (text of "#bar-baz", capture with "bar=(.*),baz=(.*)"),
 ///         //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -124,7 +124,7 @@ pub mod error;
 ///     }
 /// }
 /// ```
-/// 
+///
 /// ## Extractor part of field definitions
 /// The extractor part of field definitions specifies how to extract data from HTML.
 /// Extractor consists of [Target](#target-specifier), [Capture](#capture-specifier), [Collector](#collector-specifier) and [Parser](#parser-specifier) specifier.
@@ -143,7 +143,7 @@ pub mod error;
 /// html_extractor! {
 ///     #[derive(Debug, PartialEq)]
 ///     Foo {
-///         // extracts the first text node in the element that first matched the selector "#foo" 
+///         // extracts the first text node in the element that first matched the selector "#foo"
 ///         foo: usize = (text of "#foo"),
 ///         // extracts the third text node in the element that first matched the selector "#bar"
 ///         bar: usize = (text[2] of "#bar"),
@@ -189,7 +189,7 @@ pub mod error;
 /// Capture specifier specifies an regex that is used to capture desired data from the string that is extracted with target specifier.
 ///
 /// The number of captures and the number of tuple elements must be the same.
-/// 
+///
 /// If the specified regex is invalid, it will be a compile error.
 ///
 /// It cannot be used with target specifier `elem of ..`.
@@ -252,7 +252,7 @@ pub mod error;
 ///         // captures three data from each string with the regex "baz=(.*), qux=(.*), corge=(.*)" ,
 ///         // and collects into `Vec<(usize, usize, usize)>`
 ///         baz_qux_corge: Vec<(usize, usize, usize)> = (text of ".baz-qux-corge", capture with "baz=(.*), qux=(.*), corge=(.*)", collect),
-/// 
+///
 ///         // optionally extracts the first text node in the first element that matches the selector ".grault".
 ///         grault: Option<usize> = (text of ".grault", optional),
 ///     }
@@ -320,14 +320,14 @@ pub mod error;
 ///     });
 /// }
 /// ```
-/// 
+///
 /// # Usage of the generated structures
 /// The generated structures implement trait [`HtmlExtractor`].
 /// See the document of the trait.
 pub use html_extractor_macros::html_extractor;
 
 /// A trait for extracting data from HTML documents.
-/// 
+///
 /// It is recommended to use [`html_extractor!`](macro.html_extractor.html) to implement `HtmlExtractor`.
 pub trait HtmlExtractor
 where

@@ -502,7 +502,7 @@ impl Extractor {
             },
             ExtractTarget::Attribute { attribute, .. } => quote! {
                 let data = target_elem.value().attr(#attribute).ok_or(
-                    #_crate::error::ErrorKind::InvalidInput(
+                    #_crate::error::Error::InvalidInput(
                         ::std::borrow::Cow::Borrowed(::std::concat!(
                             "extracting the data of field `",
                             ::std::stringify!(#field_name),
@@ -517,7 +517,7 @@ impl Extractor {
             },
             ExtractTarget::TextNode { nth, .. } => quote! {
                 let data_whitespace = target_elem.text().nth(#nth).ok_or(
-                    #_crate::error::ErrorKind::InvalidInput(
+                    #_crate::error::Error::InvalidInput(
                         ::std::borrow::Cow::Borrowed(::std::concat!(
                             "extracting the data of field `",
                             ::std::stringify!(#field_name),
@@ -547,7 +547,7 @@ impl Extractor {
                 for i in 1..regex_captures_len.unwrap() {
                     captures.push(quote! {
                         (#(#parser)*)(caps.get(#i).unwrap().as_str()).or_else(|e| ::std::result::Result::Err(
-                            #_crate::error::ErrorKind::InvalidInput(
+                            #_crate::error::Error::InvalidInput(
                                 ::std::borrow::Cow::Owned(::std::format!(::std::concat!(
                                     "extracting the data of field `",
                                     ::std::stringify!(#field_name),
@@ -563,7 +563,7 @@ impl Extractor {
                 }
                 quote! {
                     let caps = REGEX.captures(data).ok_or(
-                        #_crate::error::ErrorKind::InvalidInput(
+                        #_crate::error::Error::InvalidInput(
                             ::std::borrow::Cow::Borrowed(::std::concat!(
                                 "extracting the data of field `",
                                 ::std::stringify!(#field_name),
@@ -583,7 +583,7 @@ impl Extractor {
                     #_crate::HtmlExtractor::extract(&data)?
                 },
                 _ => quote! {
-                    (#(#parser)*)(data).or_else(|e| ::std::result::Result::Err(#_crate::error::ErrorKind::InvalidInput(
+                    (#(#parser)*)(data).or_else(|e| ::std::result::Result::Err(#_crate::error::Error::InvalidInput(
                             ::std::borrow::Cow::Owned(::std::format!(::std::concat!(
                                 "extracting the data of field `",
                                 ::std::stringify!(#field_name),
@@ -606,7 +606,7 @@ impl Extractor {
                 } else {
                     quote! {
                         let target_elem = __elem.select(&*SELECTOR).next().ok_or(
-                            #_crate::error::ErrorKind::InvalidInput(
+                            #_crate::error::Error::InvalidInput(
                                 ::std::borrow::Cow::Borrowed(::std::concat!(
                                     "extracting the data of field `",
                                     ::std::stringify!(#field_name),
