@@ -73,46 +73,64 @@ fn test() {
     )
     .unwrap();
 
-    assert_eq!(data, TestData {
-        data1: InnerData { data1_1: 1 },
-        data2: 2,
-        data3: 3,
-        data4: vec![InnerData { data1_1: 1 }, InnerData { data1_1: 2 }, InnerData { data1_1: 3 }, InnerData { data1_1: 4 }],
-        data5: vec![1, 2, 3, 4],
-        data6: vec![1, 2, 3, 4],
-        data7: 7,
-        data8: 8,
-        data9: vec![(1, 5), (2, 6), (3, 7), (4, 8)],
-        data10: vec![(1, 5), (2, 6), (3, 7), (4, 8)],
-        data11_1: 7,
-        data11_2: 27,
-        data12_1: 8,
-        data12_2: 18,
-        data12_3: 46,
-        data13: vec![(1, 5, 9, 13), (2, 6, 10, 14), (3, 7, 11, 15), (4, 8, 12, 16)],
-        data14: vec![(1, 5, 9, 13, 17), (2, 6, 10, 14, 18), (3, 7, 11, 15, 19), (4, 8, 12, 16, 20)],
+    assert_eq!(
+        data,
+        TestData {
+            data1: InnerData { data1_1: 1 },
+            data2: 2,
+            data3: 3,
+            data4: vec![
+                InnerData { data1_1: 1 },
+                InnerData { data1_1: 2 },
+                InnerData { data1_1: 3 },
+                InnerData { data1_1: 4 }
+            ],
+            data5: vec![1, 2, 3, 4],
+            data6: vec![1, 2, 3, 4],
+            data7: 7,
+            data8: 8,
+            data9: vec![(1, 5), (2, 6), (3, 7), (4, 8)],
+            data10: vec![(1, 5), (2, 6), (3, 7), (4, 8)],
+            data11_1: 7,
+            data11_2: 27,
+            data12_1: 8,
+            data12_2: 18,
+            data12_3: 46,
+            data13: vec![
+                (1, 5, 9, 13),
+                (2, 6, 10, 14),
+                (3, 7, 11, 15),
+                (4, 8, 12, 16)
+            ],
+            data14: vec![
+                (1, 5, 9, 13, 17),
+                (2, 6, 10, 14, 18),
+                (3, 7, 11, 15, 19),
+                (4, 8, 12, 16, 20)
+            ],
 
-        optional_data1: Some(InnerData { data1_1: 1 }),
-        optional_data2: Some(2),
-        optional_data3: Some(3),
-        optional_data7: Some((7,)),
-        optional_data8: Some((8,)),
-        optional_data11: Some((7, 27)),
-        optional_data12: Some((8, 18, 46)),
+            optional_data1: Some(InnerData { data1_1: 1 }),
+            optional_data2: Some(2),
+            optional_data3: Some(3),
+            optional_data7: Some((7,)),
+            optional_data8: Some((8,)),
+            optional_data11: Some((7, 27)),
+            optional_data12: Some((8, 18, 46)),
 
-        none1: None,
-        none2: None,
-        none3: None,
-        none4: None,
-        none5: None,
-        none6: None,
-        none7: None,
+            none1: None,
+            none2: None,
+            none3: None,
+            none4: None,
+            none5: None,
+            none6: None,
+            none7: None,
 
-        data15: "inner<br>html".to_owned(),
-        data16_1: std::cmp::Ordering::Less,
-        data16_2: std::cmp::Ordering::Less,
-        presence_of_data16: true,
-    });
+            data15: "inner<br>html".to_owned(),
+            data16_1: std::cmp::Ordering::Less,
+            data16_2: std::cmp::Ordering::Less,
+            presence_of_data16: true,
+        }
+    );
 }
 html_extractor::html_extractor! {
     #[derive(Debug, PartialEq)]
@@ -154,7 +172,7 @@ html_extractor::html_extractor! {
         none7: Option<(usize,)> = (text[3] of "#none", capture with "(none)", optional),
 
         data15: String = (inner_html of "#data15"),
-        
+
         data16_1: std::cmp::Ordering = (text of "#data16", parse with custom_parser),
         data16_2: std::cmp::Ordering = (text of "#data16", parse with |input| match input {
             ">" => Ok(std::cmp::Ordering::Greater),
@@ -173,8 +191,8 @@ html_extractor::html_extractor! {
 fn custom_parser(input: &str) -> Result<std::cmp::Ordering, ()> {
     match input {
         ">" => Ok(std::cmp::Ordering::Greater),
-        "<" =>  Ok(std::cmp::Ordering::Less),
-        "=" =>  Ok(std::cmp::Ordering::Equal),
-        _ => Err(())
+        "<" => Ok(std::cmp::Ordering::Less),
+        "=" => Ok(std::cmp::Ordering::Equal),
+        _ => Err(()),
     }
 }
